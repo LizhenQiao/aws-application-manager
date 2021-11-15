@@ -1,5 +1,7 @@
 from flask import render_template, request, redirect, flash, url_for, session
 from app import webapp, config
+from datetime import datetime, timedelta
+from operator import itemgetter
 from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 import boto3
 s3 = boto3.client(
@@ -25,7 +27,54 @@ def worker_list():
         ]
         instances = ec2.instances.filter(Filters=filters)
 
-    return render_template("manager/worker_list.html", title="Worker List", instances=instances)
+    return render_template("manager/worker_list.html", title="Worker List",
+                           instances=instances)
+
+
+@webapp.route('/manager/workers/<id>', methods=['GET'])
+def worker_view(id):
+    ec2 = boto3.resource('ec2')
+    instance = ec2.Instance(id)
+    client = boto3.client('cloudwatch')
+    namespace = 'AWS/EC2'
+    cpu_utilization = client.get_metric_statistics(
+        Period=1 * 60,
+        StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
+        EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
+        MetricName='CPUUtilization',
+        Namespace=namespace,
+        Statistics=['Sum'],
+        Dimensions=[{'Name': 'InstanceId', 'Value': id}]
+    )
+    cpu_utilization_stats = []
+    for point in cpu_utilization['Datapoints']:
+        hour = point['Timestamp'].hour
+        minute = point['Timestamp'].minute
+        time = hour + minute/60
+        cpu_utilization_stats.append([time, point['Sum']])
+    cpu_utilization_stats = sorted(cpu_utilization_stats, key=itemgetter(0))
+
+    network_packets_in = client.get_metric_statistics(
+        Period=1 * 60,
+        StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
+        EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
+        MetricName='NetworkPacketsIn',
+        Namespace=namespace,
+        Statistics=['Average'],
+        Dimensions=[{'Name': 'InstanceId', 'Value': id}]
+    )
+    network_packets_in_stats = []
+    for point in network_packets_in['Datapoints']:
+        hour = point['Timestamp'].hour
+        minute = point['Timestamp'].minute
+        time = hour + minute/60
+        network_packets_in_stats.append([time, point['Average']])
+    network_packets_in_stats = sorted(network_packets_in_stats, key=itemgetter(0))
+
+    return render_template("manager/worker_view.html", title="Worker Info",
+                           instance=instance,
+                           cpu_utilization_stats=cpu_utilization_stats,
+                           network_packets_in_stats=network_packets_in_stats)
 
 
 @webapp.route('/manager/add', methods=['POST'])

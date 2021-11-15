@@ -1,0 +1,30 @@
+{% extends "manager/manager_base.html" %}
+{% block content %}
+<form action='{{url_for("worker_list")}}' method='get'>
+  <input type='submit' value='Back to List' />
+</form>
+<table>
+  <tr><td>ID</td><td> {{ instance.id }}</td></tr>
+  <tr><td>Image AMI ID</td><td> {{ instance.image_id }}</td></tr>
+  <tr><td>Key Pair </td><td> {{ instance.key_name }}</td></tr>
+  <tr><td>Public IP Address</td><td>{{ instance.public_ip_address }}</td></tr>
+  <tr><td>State</td><td>{{ instance.state['Name'] }}</td></tr>
+</table>
+
+<h2>CPU Utilization</h2>
+<div id="cpu_utilization_plot" style="width:300px;height:150px"></div>
+
+<h2>Network Packets In</h2>
+<div id="network_packets_in_plot" style="width:300px;height:150px"></div>
+
+<script>
+  var options = {
+    series: {
+      lines: { show: true },
+      points: { show: true }
+    }
+  };
+  $.plot($("#cpu_utilization_plot"), [ {{ cpu_utilization_stats }} ] , options);
+  $.plot($("#network_packets_in_plot"), [ {{ network_packets_in_stats }} ] , options);
+</script>
+{% endblock %}
