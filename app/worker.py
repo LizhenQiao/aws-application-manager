@@ -2,29 +2,24 @@ from flask import render_template, request, redirect, flash, url_for, session
 from app import webapp, config
 from datetime import datetime, timedelta
 from operator import itemgetter
-from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 import boto3
-s3 = boto3.client(
-    "s3",
-    aws_access_key_id=S3_KEY,
-    aws_secret_access_key=S3_SECRET
-)
+
+filters = [
+    {
+        "Name": "instance-state-name",
+        "Values": ["initializing", "pending", "running"]
+    },
+    {
+        "Name": "image-id",
+        "Values": [config.ami_id]
+    }
+]
 
 
 @webapp.route('/manager/workers', methods=['GET', 'POST'])
 def worker_list():
     if 'manager_name' in session:
         ec2 = boto3.resource('ec2')
-        filters = [
-            {
-                "Name": "instance-state-name",
-                "Values": ["initializing", "pending", "running"]
-            },
-            {
-                "Name": "image-id",
-                "Values": [config.ami_id]
-            }
-        ]
         instances = ec2.instances.filter(Filters=filters)
 
     return render_template("manager/worker_list.html", title="Worker List",
@@ -50,7 +45,7 @@ def worker_view(id):
     for point in cpu_utilization['Datapoints']:
         hour = point['Timestamp'].hour
         minute = point['Timestamp'].minute
-        time = hour + minute/60
+        time = hour + minute / 60
         cpu_utilization_stats.append([time, point['Sum']])
     cpu_utilization_stats = sorted(cpu_utilization_stats, key=itemgetter(0))
 
@@ -67,7 +62,7 @@ def worker_view(id):
     for point in network_packets_in['Datapoints']:
         hour = point['Timestamp'].hour
         minute = point['Timestamp'].minute
-        time = hour + minute/60
+        time = hour + minute / 60
         network_packets_in_stats.append([time, point['Average']])
     network_packets_in_stats = sorted(network_packets_in_stats, key=itemgetter(0))
 
@@ -82,15 +77,24 @@ def worker_add():
     if 'manager_name' in session:
         worker_count = 0
         ec2 = boto3.resource('ec2')
-        ec2.create_instances(ImageId=config.ami_id, MinCount=1, MaxCount=1,
-                             InstanceType='t2.micro', SubnetId=config.subnet_id)
+        instances = ec2.instances.filter(Filter=filters)
+        for instance in instances:
+            worker_count += 1
+        if worker_count < 7:
+            ec2.create_instances(ImageId=config.ami_id, MinCount=1, MaxCount=1,
+                                 InstanceType='t2.micro', SubnetId=config.subnet_id)
+
     return redirect(url_for('worker_list'))
 
 
 @webapp.route('/manager/delete/<id>', methods=['POST'])
 def worker_remove(id):
     if 'manager_name' in session:
+        worker_count = 0
         ec2 = boto3.resource('ec2')
-        ec2.instances.filter(InstanceIds=[id]).terminate()
-
+        instances = ec2.instances.filter(Filter=filters)
+        for instance in instances:
+            worker_count += 1
+        if worker_count > 0:
+            ec2.instances.filter(InstanceIds=[id]).terminate()
     return redirect(url_for('worker_list'))

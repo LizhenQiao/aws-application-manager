@@ -1,6 +1,8 @@
 from flask import render_template, request, redirect, flash, url_for, session
-from app import webapp
-from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
+from app import webapp, config
+from datetime import datetime, timedelta
+from operator import itemgetter
+from app.config import S3_KEY, S3_SECRET, DNS_name
 import os
 import boto3
 
@@ -31,9 +33,27 @@ def manager_page():
     os.environ['AWS_ACCESS_KEY_ID'] = S3_KEY
     os.environ['AWS_SECRET_ACCESS_KEY'] = S3_SECRET
     os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
-    #if 'manager_name' in session:
-        #cloudwatch = boto3.client('cloudwatch')
-    return render_template('manager/manager_page.html', title='Manager Page')
+    if 'manager_name' in session:
+        client = boto3.client('cloudwatch')
+        namespace = 'AWS/ApplicationELB'
+        list_workers = client.get_metric_statistics(
+            Period=1 * 60,
+            StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
+            EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
+            MetricName='HealthyHostCount',
+            Namespace=namespace,
+            Statistics=['Average'],
+            Dimensions=[{'Name': 'ImageId', 'Value': config.ami_id}]
+        )
+        list_workers_stat = []
+        for point in list_workers['Datapoints']:
+            hour = point['Timestamp'].hour
+            minute = point['Timestamp'].minute
+            time = hour + minute/60
+            list_workers_stat.append([time, point['Average']])
+        list_workers_stat = sorted(list_workers_stat, key=itemgetter(0))
+    return render_template('manager/manager_page.html', title='Manager Page',
+                           list_workers_stat=list_workers_stat, DNS_name=DNS_name)
 
 
 @webapp.route('/logout', methods=['GET', 'POST'])

@@ -3,6 +3,7 @@
 <form action="{{url_for('worker_add')}}" method="post">
   <input type="submit" value="Add Worker">
 </form>
+
 <table>
   <thead>
     <th>ID</th>
@@ -17,7 +18,7 @@
       <td>{{ instance.placement['AvailabilityZone']}}</td>
       <td>{{ instance.state['Name'] }}</td>
       <td>
-        <form action="{{url_for('worker_view',id=instance.id)}}" method='get'>
+        <form action="{{url_for('worker_view', id=instance.id)}}" method='get'>
           <input type='submit' value='Details' />
         </form>
       </td>

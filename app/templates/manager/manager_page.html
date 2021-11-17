@@ -2,5 +2,24 @@
 {% block content %}
 <ul>
   <li><a href="{{url_for('worker_list')}}">View Worker List</a></li>
+  <li><a href="{{url_for('auto_scaling_settings')}}">Edit Auto-Scaling Settings</a></li>
+  <li>
+    <form action="{{dns_name}}">
+      <input type="submit" value="Enter the user-app">
+    </form>
+  </li>
 </ul>
+
+<h2>List Workers</h2>
+<div id="list_workers_plot" style="width:300px;height:150px"></div>
+
+<script>
+  var options = {
+    series: {
+      lines: { show: true },
+      points: { show: true }
+    }
+  };
+  $.plot($("#list_workers_plot"), [ {{ list_workers_stat }} ] , options);
+</script>
 {% endblock %}
