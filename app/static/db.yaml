@@ -1,4 +1,4 @@
-mysql_host: 'ece1779project.cq59kgsjws00.us-east-1.rds.amazonaws.com'
+mysql_host: 'ece1779-project.cb0oiyhho4rp.us-east-1.rds.amazonaws.com'
 mysql_user: 'root'
-mysql_password: 'ece1779pass'
+mysql_password: '12345678'
 mysql_db: 'ece1779_project'

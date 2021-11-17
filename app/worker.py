@@ -82,10 +82,59 @@ def worker_add():
         for instance in instances:
             worker_count += 1
         if worker_count < 7:
-            ec2.create_instances(ImageId=config.ami_id, MinCount=1, MaxCount=1,
-                                 InstanceType='t2.micro', SubnetId=config.subnet_id)
-
+            ec2.create_instances(ImageId=config.ami_id,
+                                 MinCount=1,
+                                 MaxCount=1,
+                                 InstanceType='t2.micro',
+                                 Monitoring={"Enabled": True},
+                                 KeyName=config.user_key_pair,
+                                 NetworkInterfaces=[
+                                     {
+                                         "DeviceIndex": 0,
+                                         "AssociatePublicIpAddress": True,
+                                         "SubnetId": config.subnet_id,
+                                         "Groups": [config.secret_group]
+                                     }
+                                 ],
+                                 )
     return redirect(url_for('worker_list'))
+
+
+@webapp.route('/manager/register', methods=['POST'])
+def worker_register():
+    if 'manager_name' in session:
+        elb = boto3.client('elbv2')
+        ec2 = boto3.resource('ec2')
+        filters = [
+            {
+                "Name": "instance-state-name",
+                'Values': ['running', 'pending']
+            },
+            {
+                "Name": "image-id",
+                "Values": [config.ami_id]
+            }
+        ]
+        instances = ec2.instances.filter(Filters=filters)
+        running_instances = []
+        for instance in instances:
+            running_instances.append(instance.id)
+        if not running_instances:
+            flash('Please wait until after worker initialization')
+            return redirect(url_for('worker_list'))
+        else:
+            for instance_id in running_instances:
+                elb.register_targets(
+                    TargetGroupArn=config.target_group,
+                    Targets=[
+                        {
+                            "Id": instance_id,
+                            "Port": 5000
+                        },
+                    ]
+                )
+        flash('Successfully register worker to ALB')
+        return redirect(url_for('worker_list'))
 
 
 @webapp.route('/manager/delete/<id>', methods=['POST'])

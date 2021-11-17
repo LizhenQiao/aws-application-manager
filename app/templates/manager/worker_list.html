@@ -4,6 +4,10 @@
   <input type="submit" value="Add Worker">
 </form>
 
+<form action="{{url_for('worker_register')}}" method="post">
+  <input type="submit" value="Register Worker">
+</form>
+
 <table>
   <thead>
     <th>ID</th>
@@ -29,5 +33,16 @@
       </td>
     </tr>
   {% endfor %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %} {% if category =='error'%}
+            <li style="color: red">{{ message }}</li>
+        {% else %}
+            <li style="color: green">{{ message }}</li>
+        {% endif %} {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
 </table>
 {% endblock %}
