@@ -72,6 +72,7 @@ def worker_view(id):
                            network_packets_in_stats=network_packets_in_stats)
 
 
+# TODO: Fix - add && delete UnauthorizedOperation
 @webapp.route('/manager/add', methods=['POST'])
 def worker_add():
     if 'manager_name' in session:
