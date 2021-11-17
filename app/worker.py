@@ -2,13 +2,13 @@ from flask import render_template, request, redirect, flash, url_for, session
 from app import webapp, config
 from datetime import datetime, timedelta
 from operator import itemgetter
-from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
+# from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 import boto3
-s3 = boto3.client(
-    "s3",
-    aws_access_key_id=S3_KEY,
-    aws_secret_access_key=S3_SECRET
-)
+# s3 = boto3.client(
+#     "s3",
+#     aws_access_key_id=S3_KEY,
+#     aws_secret_access_key=S3_SECRET
+# )
 
 
 @webapp.route('/manager/workers', methods=['GET', 'POST'])
@@ -77,10 +77,10 @@ def worker_view(id):
                            network_packets_in_stats=network_packets_in_stats)
 
 
+# TODO: Fix - add && delete UnauthorizedOperation
 @webapp.route('/manager/add', methods=['POST'])
 def worker_add():
     if 'manager_name' in session:
-        worker_count = 0
         ec2 = boto3.resource('ec2')
         ec2.create_instances(ImageId=config.ami_id, MinCount=1, MaxCount=1,
                              InstanceType='t2.micro', SubnetId=config.subnet_id)

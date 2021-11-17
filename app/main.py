@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, flash, url_for, session
 from app import webapp
-from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
+# from app.config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 import os
 import boto3
 
@@ -28,8 +28,8 @@ def manager_login():
 
 @webapp.route('/manager', methods=['GET', 'POST'])
 def manager_page():
-    os.environ['AWS_ACCESS_KEY_ID'] = S3_KEY
-    os.environ['AWS_SECRET_ACCESS_KEY'] = S3_SECRET
+    # os.environ['AWS_ACCESS_KEY_ID'] = S3_KEY
+    # os.environ['AWS_SECRET_ACCESS_KEY'] = S3_SECRET
     os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
     #if 'manager_name' in session:
         #cloudwatch = boto3.client('cloudwatch')
