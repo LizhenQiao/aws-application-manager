@@ -11,7 +11,7 @@ filters = [
     },
     {
         "Name": "image-id",
-        "Values": [config.ami_id]
+        "Values": [config.AMI_ID]
     }
 ]
 
@@ -80,18 +80,18 @@ def worker_add():
         for instance in instances:
             worker_count += 1
         if worker_count < 7:
-            ec2.create_instances(ImageId=config.ami_id,
+            ec2.create_instances(ImageId=config.AMI_ID,
                                  MinCount=1,
                                  MaxCount=1,
                                  InstanceType='t2.micro',
                                  Monitoring={'Enabled': True},
-                                 KeyName=config.user_key_pair,
+                                 KeyName=config.USER_KEY_PAIR,
                                  NetworkInterfaces=[
                                      {
                                          'DeviceIndex': 0,
                                          'AssociatePublicIpAddress': True,
-                                         'SubnetId': config.subnet_id,
-                                         'Groups': [config.secret_group]
+                                         'SubnetId': config.SUBNET_ID,
+                                         'Groups': [config.SECRET_GROUP]
                                      }
                                  ],
                                  UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
@@ -111,7 +111,7 @@ def worker_register():
             },
             {
                 "Name": "image-id",
-                "Values": [config.ami_id]
+                "Values": [config.AMI_ID]
             }
         ]
         instances = ec2.instances.filter(Filters=filters)
@@ -124,7 +124,7 @@ def worker_register():
         else:
             for instance_id in running_instances:
                 elb.register_targets(
-                    TargetGroupArn=config.target_group_arn,
+                    TargetGroupArn=config.TARGET_GROUP_ARN,
                     Targets=[
                         {
                             "Id": instance_id,
