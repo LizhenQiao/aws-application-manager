@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, flash, url_for, session
 from app import webapp, config
 from datetime import datetime, timedelta
 from operator import itemgetter
-from app.config import KEY, SECRET, DNS_name
+from app.config import KEY, SECRET, DNS_name, target_group_arn, load_balancer_arn
 import os
 import boto3
 
@@ -34,6 +34,12 @@ def manager_page():
     os.environ['AWS_ACCESS_KEY_ID'] = KEY
     os.environ['AWS_SECRET_ACCESS_KEY'] = SECRET
     os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
+    tg = target_group_arn.split(':')
+    tg_name = tg[-1]
+    lb = load_balancer_arn.split(':')
+    lb = lb[-1]
+    lb_array = lb.split('/')
+    lb_name = lb_array[1] + '/' + lb_array[2] + '/' + lb_array[3]
     if 'manager_name' in session:
         client = boto3.client('cloudwatch')
         namespace = 'AWS/ApplicationELB'
@@ -44,7 +50,12 @@ def manager_page():
             MetricName='HealthyHostCount',
             Namespace=namespace,
             Statistics=['Average'],
-            Dimensions=[{'Name': 'ImageId', 'Value': config.ami_id}]
+            Dimensions=[
+                {'Name': 'TargetGroup',
+                 'Value': tg_name},
+                {'Name': 'LoadBalancer',
+                 'Value': lb_name}
+            ]
         )
         list_workers_stat = []
         for point in list_workers['Datapoints']:

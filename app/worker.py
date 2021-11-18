@@ -71,7 +71,6 @@ def worker_view(id):
                            network_packets_in_stats=network_packets_in_stats)
 
 
-# TODO: Fix - add && delete UnauthorizedOperation
 @webapp.route('/manager/add', methods=['POST'])
 def worker_add():
     if 'manager_name' in session:
@@ -85,14 +84,14 @@ def worker_add():
                                  MinCount=1,
                                  MaxCount=1,
                                  InstanceType='t2.micro',
-                                 Monitoring={"Enabled": True},
+                                 Monitoring={'Enabled': True},
                                  KeyName=config.user_key_pair,
                                  NetworkInterfaces=[
                                      {
-                                         "DeviceIndex": 0,
-                                         "AssociatePublicIpAddress": True,
-                                         "SubnetId": config.subnet_id,
-                                         "Groups": [config.secret_group]
+                                         'DeviceIndex': 0,
+                                         'AssociatePublicIpAddress': True,
+                                         'SubnetId': config.subnet_id,
+                                         'Groups': [config.secret_group]
                                      }
                                  ],
                                  UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
@@ -125,7 +124,7 @@ def worker_register():
         else:
             for instance_id in running_instances:
                 elb.register_targets(
-                    TargetGroupArn=config.target_group,
+                    TargetGroupArn=config.target_group_arn,
                     Targets=[
                         {
                             "Id": instance_id,
