@@ -1,9 +1,8 @@
 from flask import render_template, request, redirect, flash, url_for, session
-
 from app import webapp, config
 from datetime import datetime, timedelta
 from operator import itemgetter
-from app.config import KEY, SECRET, DNS_name
+from app.config import KEY, SECRET
 import os
 import boto3
 
@@ -54,7 +53,7 @@ def manager_page():
             list_workers_stat.append([time, point['Average']])
         list_workers_stat = sorted(list_workers_stat, key=itemgetter(0))
     return render_template('manager/manager_page.html', title='Manager Page',
-                           list_workers_stat=list_workers_stat, DNS_name=DNS_name)
+                           list_workers_stat=list_workers_stat)
 
 
 @webapp.route('/logout', methods=['GET', 'POST'])
