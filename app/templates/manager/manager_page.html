@@ -3,11 +3,9 @@
 <ul>
   <li><a href="{{url_for('worker_list')}}">View Worker List</a></li>
   <li><a href="{{url_for('auto_scaling_settings')}}">Edit Auto-Scaling Settings</a></li>
-  <li>
-    <form action="http://ManagerAppALB-1714384015.us-east-1.elb.amazonaws.com">
-      <input type="submit" value="Enter the user-app">
-    </form>
-  </li>
+  <li><a href="http://ManagerAppALB-1714384015.us-east-1.elb.amazonaws.com">Enter the User-app</a></li>
+  <li><a href="{{url_for('stop_manager_app')}}"></a>Stop the Manager-app</li>
+  <li><a href="{{url_for('delete_application_data')}}"></a>Delete all Application Data</li>
 </ul>
 
 <h2>List Workers</h2>

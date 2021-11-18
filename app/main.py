@@ -2,10 +2,21 @@ from flask import render_template, request, redirect, flash, url_for, session
 from app import webapp, config
 from datetime import datetime, timedelta
 from operator import itemgetter
-from app.config import KEY, SECRET
+from app.config import KEY, SECRET, S3_BUCKET
+from .MySQL_DB import mysql
 import os
 import boto3
 
+filters = [
+    {
+        "Name": "instance-state-name",
+        'Values': ['running', 'pending']
+    },
+    {
+        "Name": "image-id",
+        "Values": [config.ami_id]
+    }
+]
 
 @webapp.route('/', methods=['GET', 'POST'])
 def manager_login():
@@ -60,3 +71,38 @@ def manager_page():
 def manager_logout():
     session.clear()
     return redirect(url_for('manager_login'))
+
+
+@webapp.route('/stop', methods=['GET'])
+def stop_manager_app():
+    worker_count = 0
+    ec2 = boto3.resource("ec2")
+    instances = ec2.instances.filter(Filters=filter)
+    running_instances = []
+    for instance in instances:
+        worker_count += 1
+        running_instances.append(instance.id)
+    #  terminate all the workers
+    for w in range(worker_count):
+        id = running_instances[-1]
+        ec2.instances.filter(InstanceIds=[id]).terminate()
+        running_instances.remove(id)
+    #  stop the manager app
+    ec2.instances.filter(InstanceIds=[config.manager_app_instance_id]).stop()
+
+
+@webapp.route('/delete', methods=['GET'])
+def delete_application_data():
+    #  clear all data in the database
+    cursor = mysql.connection.cursor()
+    query = "DELETE FROM users"
+    cursor.execute(query)
+    query = "DELETE FROM images"
+    cursor.execute(query)
+    query = "UPDATE auto_scaler_settings SET upperthres=100, lowerthres=0, expandratio=1, shrinkratio=1 WHERE id = 1"
+    cursor.execute(query)
+    mysql.connection.commit()
+    cursor.close()
+    #  clear all data in the S3 bucket
+    s3 = boto3.resource('s3')
+    s3.Object(config.S3_BUCKET, config.KEY).delete()
