@@ -21,7 +21,6 @@ def worker_list():
     if 'manager_name' in session:
         ec2 = boto3.resource('ec2')
         instances = ec2.instances.filter(Filters=filters)
-
     return render_template("manager/worker_list.html", title="Worker List",
                            instances=instances)
 
@@ -78,7 +77,7 @@ def worker_add():
     if 'manager_name' in session:
         worker_count = 0
         ec2 = boto3.resource('ec2')
-        instances = ec2.instances.filter(Filter=filters)
+        instances = ec2.instances.filter(Filters=filters)
         for instance in instances:
             worker_count += 1
         if worker_count < 7:
@@ -96,6 +95,7 @@ def worker_add():
                                          "Groups": [config.secret_group]
                                      }
                                  ],
+                                 UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
                                  )
     return redirect(url_for('worker_list'))
 
@@ -142,7 +142,7 @@ def worker_remove(id):
     if 'manager_name' in session:
         worker_count = 0
         ec2 = boto3.resource('ec2')
-        instances = ec2.instances.filter(Filter=filters)
+        instances = ec2.instances.filter(Filters=filters)
         for instance in instances:
             worker_count += 1
         if worker_count > 0:

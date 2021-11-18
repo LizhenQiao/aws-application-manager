@@ -1,13 +1,14 @@
-KEY='AKIASP5A2XKYWE3N5RXJ'
-SECRET='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'
+KEY='AKIAU7TOV7Y25ESZI7RS'
+SECRET='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'
 S3_BUCKET='ece1779-image-bucket'
 S3_LOCATION='https://{}.s3.amazonaws.com/'.format(S3_BUCKET)
-ami_id='ami-080ff70d8f5b80ba5'
-user_key_pair ='ece1779-user-app'
-target_group='arn:aws:elasticloadbalancing:us-east-1:171599116977:targetgroup/ece1779-TG/b8a04895352b0056'
-secret_group='sg-0620d75f56dbbe402'
-subnet_id='subnet-0a43cff6e8c356a6a'
-DNS_name='ece1779-alb-165655737.us-east-1.elb.amazonaws.com'
+ami_id='ami-0390948ffde8938ac'
+# ami_id='ami-017339e628fa69ffc'
+user_key_pair ='ece1779_project1'
+target_group='arn:aws:elasticloadbalancing:us-east-1:342755769909:loadbalancer/app/ece1779-LB/763551f5ce8eb411'
+secret_group='sg-0c55c636d34b32889'
+subnet_id='subnet-0e2f6b9f3edee81ab'
+DNS_name='ece1779-loadBalancer-133897983.us-east-1.elb.amazonaws.com'
 
 
 
