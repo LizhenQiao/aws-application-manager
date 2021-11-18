@@ -78,7 +78,7 @@ def worker_add():
     if 'manager_name' in session:
         worker_count = 0
         ec2 = boto3.resource('ec2')
-        instances = ec2.instances.filter(Filter=filters)
+        instances = ec2.instances.filter(Filters=filters)
         for instance in instances:
             worker_count += 1
         if worker_count < 7:
@@ -86,16 +86,17 @@ def worker_add():
                                  MinCount=1,
                                  MaxCount=1,
                                  InstanceType='t2.micro',
-                                 Monitoring={"Enabled": True},
+                                 Monitoring={'Enabled': True},
                                  KeyName=config.user_key_pair,
                                  NetworkInterfaces=[
                                      {
-                                         "DeviceIndex": 0,
-                                         "AssociatePublicIpAddress": True,
-                                         "SubnetId": config.subnet_id,
-                                         "Groups": [config.secret_group]
+                                         'DeviceIndex': 0,
+                                         'AssociatePublicIpAddress': True,
+                                         'SubnetId': config.subnet_id,
+                                         'Groups': [config.secret_group]
                                      }
                                  ],
+                                 UserData='#!/bin/bash\n /bin/bash /home/ubuntu/start.sh'
                                  )
     return redirect(url_for('worker_list'))
 
@@ -125,7 +126,7 @@ def worker_register():
         else:
             for instance_id in running_instances:
                 elb.register_targets(
-                    TargetGroupArn=config.target_group,
+                    TargetGroupArn=config.target_group_arn,
                     Targets=[
                         {
                             "Id": instance_id,
@@ -142,7 +143,7 @@ def worker_remove(id):
     if 'manager_name' in session:
         worker_count = 0
         ec2 = boto3.resource('ec2')
-        instances = ec2.instances.filter(Filter=filters)
+        instances = ec2.instances.filter(Filters=filters)
         for instance in instances:
             worker_count += 1
         if worker_count > 0:
