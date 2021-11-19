@@ -10,6 +10,4 @@ SUBNET_ID='subnet-0e2f6b9f3edee81ab'
 DNS_NAME='http://ece1779-loadBalancer-133897983.us-east-1.elb.amazonaws.com'
 TARGET_GROUP_ARN='arn:aws:elasticloadbalancing:us-east-1:342755769909:targetgroup/ece1779LB/e082df024e1df4c2'
 LOAD_BALANCER_ARN='arn:aws:elasticloadbalancing:us-east-1:342755769909:loadbalancer/app/ece1779-LB/763551f5ce8eb411'
-
-
-
+MANAGER_APP_INSTANCE_ID=''

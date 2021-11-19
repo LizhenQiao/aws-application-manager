@@ -2,14 +2,20 @@
 <ul>
   <li><a href="{{url_for('worker_list')}}">View Worker List</a></li>
   <li>
+    <form action="{{DNS_name}}">
+      <input type="submit" value="Enter the user-app" />
+    </form>
+  </li>
+  <li>
     <a href="{{url_for('auto_scaling_settings')}}"
       >Edit Auto-Scaling Settings</a
     >
   </li>
+  <li><a href="{{url_for('stop_manager_app')}}">Stop the Manager-app</a></li>
   <li>
-    <form action="{{DNS_name}}">
-      <input type="submit" value="Enter the user-app" />
-    </form>
+    <a href="{{url_for('delete_application_data')}}"
+      >Delete all Application Data</a
+    >
   </li>
 </ul>
 
