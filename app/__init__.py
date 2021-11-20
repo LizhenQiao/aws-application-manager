@@ -56,33 +56,34 @@ filters = [
         "Values": [config.AMI_ID]
     }
 ]
-current_worker_count = 0
-instances = ec2.instances.filter(Filters=filters)
-for instance in instances:
-    current_worker_count += 1
-if current_worker_count == 0:  # add a worker if the worker pool is empty
-    ec2.create_instances(ImageId=config.AMI_ID,
-                         MinCount=1,
-                         MaxCount=1,
-                         InstanceType='t2.micro',
-                         Monitoring={"Enabled": True},
-                         KeyName=config.USER_KEY_PAIR,
-                         NetworkInterfaces=[
-                             {
-                                 "DeviceIndex": 0,
-                                 "AssociatePublicIpAddress": True,
-                                 "SubnetId": config.SUBNET_ID,
-                                 "Groups": [config.SECRET_GROUP]
-                             }
-                         ],
-                         UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
-                         )
-time.sleep(240)  # wait for instance initializing phrase
+
 
 
 def worker_pool_monitor():
-    global thread
-    with lock:
+    current_worker_count = 0
+    instances = ec2.instances.filter(Filters=filters)
+    for instance in instances:
+        current_worker_count += 1
+    if current_worker_count == 0:  # add a worker if the worker pool is empty
+        ec2.create_instances(ImageId=config.AMI_ID,
+                            MinCount=1,
+                            MaxCount=1,
+                            InstanceType='t2.micro',
+                            Monitoring={"Enabled": True},
+                            KeyName=config.USER_KEY_PAIR,
+                            NetworkInterfaces=[
+                                {
+                                    "DeviceIndex": 0,
+                                    "AssociatePublicIpAddress": True,
+                                    "SubnetId": config.SUBNET_ID,
+                                    "Groups": [config.SECRET_GROUP]
+                                }
+                            ],
+                            UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
+                            )
+    time.sleep(240)  # wait for instance initializing phrase
+    
+    while True:
         worker_count = 0
         instances = ec2.instances.filter(Filters=filters)
         running_instances = []
@@ -137,20 +138,20 @@ def worker_pool_monitor():
         worker_diff = updated_worker_count - worker_count
         if worker_diff > 0:  # case expand the worker pool
             ec2.create_instances(ImageId=config.AMI_ID,
-                                 MinCount=1,
-                                 MaxCount=worker_diff,
-                                 InstanceType='t2.micro',
-                                 Monitoring={"Enabled": True},
-                                 KeyName=config.USER_KEY_PAIR,
-                                 NetworkInterfaces=[
-                                     {
-                                         "DeviceIndex": 0,
-                                         "AssociatePublicIpAddress": True,
-                                         "SubnetId": config.SUBNET_ID,
-                                         "Groups": [config.SECRET_GROUP]
-                                     }
-                                 ],
-                                 )
+                                    MinCount=1,
+                                    MaxCount=worker_diff,
+                                    InstanceType='t2.micro',
+                                    Monitoring={"Enabled": True},
+                                    KeyName=config.USER_KEY_PAIR,
+                                    NetworkInterfaces=[
+                                        {
+                                            "DeviceIndex": 0,
+                                            "AssociatePublicIpAddress": True,
+                                            "SubnetId": config.SUBNET_ID,
+                                            "Groups": [config.SECRET_GROUP]
+                                        }
+                                    ],
+                                    )
         elif worker_diff < 0:  # case shrink the worker pool
             worker_to_remove = -worker_diff
             for w in range(worker_to_remove):
@@ -159,8 +160,7 @@ def worker_pool_monitor():
                 running_instances.remove(id)
         time.sleep(240)  # wait for instance initializing phrase
 
-    thread = threading.Timer(1*60, worker_pool_monitor(), ())
-    thread.start()
+
 
 
 def terminate():
@@ -170,8 +170,6 @@ def terminate():
 
 #  start the thread
 global thread
-thread = threading.Thread()
-lock = threading.Lock()
-thread = threading.Timer(1*60, worker_pool_monitor(), ())
+thread = threading.Thread(target=worker_pool_monitor)
 thread.start()
 atexit.register(terminate)

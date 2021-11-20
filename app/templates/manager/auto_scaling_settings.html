@@ -1,18 +1,31 @@
-{% extends "manager/manager_base.html" %}
-{% block content %}
+{% extends "manager/manager_base.html" %} {% block content %}
 <h2>Auto Scaling Settings</h2>
 <form action="/autoscaler" method="get">
   <table>
     <tr>
       <td>CPU threshold for growing the worker pool:</td>
       <td>
-        <input type="number" name="upperthres" min="85" max="100" step="1" required>
+        <input
+          type="number"
+          name="upperthres"
+          min="85"
+          max="100"
+          step="1"
+          required
+        />
       </td>
     </tr>
     <tr>
       <td>CPU threshold for shrinking the worker pool:</td>
       <td>
-        <input type="number" name="lowerthres" min="0" max="15" step="1" required>
+        <input
+          type="number"
+          name="lowerthres"
+          min="0"
+          max="15"
+          step="1"
+          required
+        />
       </td>
     </tr>
     <tr>
@@ -37,8 +50,8 @@
     </tr>
     <tr>
       <td>
-        <input type="submit" value="Confirm">
-        <input type="reset">
+        <input type="submit" value="Confirm" />
+        <input type="reset" />
       </td>
     </tr>
   </table>
