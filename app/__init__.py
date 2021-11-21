@@ -49,7 +49,7 @@ ec2 = boto3.resource('ec2')
 filters = [
     {
         'Name': 'instance-state-name',
-        'Values': ['running', 'pending']
+        'Values': ['running', 'pending', 'initilizing']
     },
     {
         "Name": "image-id",
@@ -81,8 +81,10 @@ def worker_pool_monitor():
                             ],
                             UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
                             )
-    time.sleep(240)  # wait for instance initializing phrase
-    
+        print("Initializing first worker...")
+        time.sleep(240)  # wait for instance initializing phrase
+    print('Workers have been initialized.')
+
     while True:
         worker_count = 0
         instances = ec2.instances.filter(Filters=filters)
@@ -126,17 +128,18 @@ def worker_pool_monitor():
 
         updated_worker_count = 0
         if average_cpu_utilization > upperthres:
-            updated_worker_count = math.ceil(worker_count * shrinkratio)
+            updated_worker_count = math.ceil(worker_count * expandratio)
             if updated_worker_count > 6:
                 updated_worker_count = 6
         elif average_cpu_utilization < lowerthres:
-            updated_worker_count = math.ceil(worker_count * expandratio)
+            updated_worker_count = math.ceil(worker_count * shrinkratio)
             if updated_worker_count < 1:
                 updated_worker_count = 1
         else:
             updated_worker_count = worker_count
         worker_diff = updated_worker_count - worker_count
         if worker_diff > 0:  # case expand the worker pool
+            print("Creating new workers...")
             ec2.create_instances(ImageId=config.AMI_ID,
                                     MinCount=1,
                                     MaxCount=worker_diff,
@@ -151,15 +154,21 @@ def worker_pool_monitor():
                                             "Groups": [config.SECRET_GROUP]
                                         }
                                     ],
+                                    UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
                                     )
+            print("New worker has been created. Waiting for initializing...")
+            time.sleep(240)  # wait for instance initializing phrase
+            print("New worker has been initialized.")
         elif worker_diff < 0:  # case shrink the worker pool
             worker_to_remove = -worker_diff
+            print("Shrinking workers...")
             for w in range(worker_to_remove):
                 id = running_instances[-1]  # point to the last instance in the list
                 ec2.instances.filter(InstanceIds=[id]).terminate()
                 running_instances.remove(id)
-        time.sleep(240)  # wait for instance initializing phrase
-
+            time.sleep(60)
+            print("Workers has been deleted.")
+        time.sleep(60)
 
 
 
