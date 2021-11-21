@@ -79,7 +79,7 @@ def worker_add():
         instances = ec2.instances.filter(Filters=filters)
         for instance in instances:
             worker_count += 1
-        if worker_count < 7:
+        if worker_count < 6:
             ec2.create_instances(ImageId=config.AMI_ID,
                                  MinCount=1,
                                  MaxCount=1,

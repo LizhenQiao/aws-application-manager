@@ -91,7 +91,8 @@ def manager_logout():
 def stop_manager_app():
     worker_count = 0
     ec2 = boto3.resource("ec2")
-    instances = ec2.instances.filter(Filters=filter)
+    client = boto3.client("ec2")
+    instances = ec2.instances.filter(Filters=filters)
     running_instances = []
     for instance in instances:
         worker_count += 1
@@ -102,15 +103,18 @@ def stop_manager_app():
         ec2.instances.filter(InstanceIds=[id]).terminate()
         running_instances.remove(id)
     #  stop the manager app
-    ec2.instances.filter(InstanceIds=[config.MANAGER_APP_INSTANCE_ID]).stop()
+    client.stop_instances(InstanceIds=[config.MANAGER_APP_INSTANCE_ID, ],)
+    return """
+        <h2>Manager has been stopped.</h2>
+    """
 
 @webapp.route('/delete', methods=['GET'])
 def delete_application_data():
     #  clear all data in the database
     cursor = mysql.connection.cursor()
-    query = "DELETE FROM users"
-    cursor.execute(query)
     query = "DELETE FROM images"
+    cursor.execute(query)
+    query = "DELETE FROM users"
     cursor.execute(query)
     query = "UPDATE auto_scaler_settings SET upperthres=100, lowerthres=0, expandratio=1, shrinkratio=1 WHERE id = 1"
     cursor.execute(query)
@@ -118,4 +122,7 @@ def delete_application_data():
     cursor.close()
     #  clear all data in the S3 bucket
     s3 = boto3.resource('s3')
-    s3.Object(config.S3_BUCKET, config.KEY).delete()
+    bucket = s3.Bucket(config.S3_BUCKET)
+    bucket.objects.all().delete()
+    flash('Delete all data successfully')
+    return redirect(url_for('manager_page'))
