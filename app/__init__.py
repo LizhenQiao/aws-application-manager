@@ -125,6 +125,7 @@ def worker_pool_monitor():
         for point in cpu_utilization['Datapoints']:
             if 'Average' in point:
                 average_cpu_utilization = point['Average']  # current average cpu utilization
+        print("average_cpu_utilization: {}".format(average_cpu_utilization))
 
         updated_worker_count = 0
         if average_cpu_utilization > upperthres:
@@ -168,7 +169,7 @@ def worker_pool_monitor():
                 running_instances.remove(id)
             time.sleep(60)
             print("Workers has been deleted.")
-        time.sleep(60)
+        time.sleep(15)
 
 
 

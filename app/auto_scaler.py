@@ -21,4 +21,4 @@ def auto_scaler():
     mysql.connection.commit()
     cursor.close()
 
-    return render_template('manager/manager_page.html')
+    return render_template("manager/auto_scaling_settings.html")
