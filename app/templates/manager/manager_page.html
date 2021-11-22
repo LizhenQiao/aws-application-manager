@@ -1,26 +1,57 @@
 {% extends "manager/manager_base.html" %} {% block content %}
-<ul>
-  <li><a href="{{url_for('worker_list')}}">View Worker List</a></li>
-  <li>
-    <form action="{{DNS_name}}">
-      <input type="submit" value="Enter the user-app" />
-    </form>
-  </li>
-  <li>
-    <a href="{{url_for('auto_scaling_settings')}}"
-      >Edit Auto-Scaling Settings</a
-    >
-  </li>
-  <li><a href="{{url_for('stop_manager_app')}}">Stop the Manager-app</a></li>
-  <li>
-    <a href="{{url_for('delete_application_data')}}"
-      >Delete all Application Data</a
-    >
-  </li>
-</ul>
 
 <h2>List Workers</h2>
-<div id="list_workers_plot" style="width: 300px; height: 150px"></div>
+<div id="list_workers_plot" style="width: 500px; height: 250px"></div>
+
+<br />
+<br />
+
+<form action="{{DNS_name}}">
+  <input type="submit" class="btn btn-primary" value="Enter the user-app" />
+</form>
+
+<br />
+<br />
+
+<div class="accordion" id="accordionPanelsStayOpenExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+      <button
+        class="accordion-button"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#panelsStayOpen-collapseOne"
+        aria-expanded="true"
+        aria-controls="panelsStayOpen-collapseOne"
+      >
+        Functions of normal users
+      </button>
+    </h2>
+    <div
+      id="panelsStayOpen-collapseOne"
+      class="accordion-collapse collapse show"
+      aria-labelledby="panelsStayOpen-headingOne"
+    >
+      <div class="accordion-body">
+        <strong
+          >you can access all the functions by clicking the navigation bar at
+          the top of the page. <br
+        /></strong>
+        <strong>- Worker List:</strong> redirect to homepage. <br />
+        <strong>- Setting:</strong> you could upload images either by typing in
+        an accessable URL or choosing from your local files. <br />
+        <strong>- Stop:</strong> you could view all your images and related
+        images transformed here. <br />
+        <strong>- Delete:</strong> you could change password of the account you
+        are currently login. <br />
+        <strong>- Logout:</strong> you could logout the account and redirect to
+        the entrance page by clicking Logout. <br />
+        <strong>- Enter the user-app:</strong> you could logout the account and
+        redirect to the entrance page by clicking Logout. <br />
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
   setTimeout(() => {
@@ -34,15 +65,13 @@
   };
   $.plot($("#list_workers_plot"), [ {{ list_workers_stat }} ] , options);
 </script>
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul class="flashes">
-            {% for category, message in messages %} {% if category =='error'%}
-                <li style="color: red">{{ message }}</li>
-            {% else %}
-                <li style="color: green">{{ message }}</li>
-            {% endif %} {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
-{% endblock %}
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%}
+<ul class="flashes">
+  {% for category, message in messages %} {% if category =='error'%}
+  <li style="color: red">{{ message }}</li>
+  {% else %}
+  <li style="color: green">{{ message }}</li>
+  {% endif %} {% endfor %}
+</ul>
+{% endif %} {% endwith %} {% endblock %}

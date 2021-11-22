@@ -1,48 +1,59 @@
-{% extends "manager/manager_base.html" %}
-{% block content %}
-<form action="{{url_for('worker_add')}}" method="post">
-  <input type="submit" value="Add Worker">
-</form>
+{% extends "manager/manager_base.html" %} {% block content %}
 
-<form action="{{url_for('worker_register')}}" method="post">
-  <input type="submit" value="Register Worker">
-</form>
+<br />
+<h2>Worker List</h2>
+<br />
 
-<table>
+<table class="table table-border">
   <thead>
     <th>ID</th>
     <th>Type</th>
     <th>Availability Zone</th>
     <th>Status</th>
+    <th>Show Detail</th>
+    <th>Remove</th>
   </thead>
   {% for instance in instances %}
-    <tr>
-      <td>{{ instance.id }}</td>
-      <td>{{ instance.instance_type }}</td>
-      <td>{{ instance.placement['AvailabilityZone']}}</td>
-      <td>{{ instance.state['Name'] }}</td>
-      <td>
-        <form action="{{url_for('worker_view', id=instance.id)}}" method='get'>
-          <input type='submit' value='Details' />
-        </form>
-      </td>
-      <td>
-        <form action="{{url_for('worker_remove', id=instance.id)}}" method='post' onsubmit='return confirm("Are you sure you want to remove the worker?")'>
-          <input type='submit' value='Remove' />
-        </form>
-      </td>
-    </tr>
-  {% endfor %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul class="flashes">
-        {% for category, message in messages %} {% if category =='error'%}
-            <li style="color: red">{{ message }}</li>
-        {% else %}
-            <li style="color: green">{{ message }}</li>
-        {% endif %} {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+  <tr>
+    <td>{{ instance.id }}</td>
+    <td>{{ instance.instance_type }}</td>
+    <td>{{ instance.placement['AvailabilityZone']}}</td>
+    <td>{{ instance.state['Name'] }}</td>
+    <td>
+      <form action="{{url_for('worker_view', id=instance.id)}}" method="get">
+        <input type="submit" value="Details" />
+      </form>
+    </td>
+    <td>
+      <form
+        action="{{url_for('worker_remove', id=instance.id)}}"
+        method="post"
+        onsubmit='return confirm("Are you sure you want to remove the worker?")'
+      >
+        <input type="submit" value="Remove" />
+      </form>
+    </td>
+  </tr>
+  {% endfor %} {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <ul class="flashes">
+    {% for category, message in messages %} {% if category =='error'%}
+    <li style="color: red">{{ message }}</li>
+    {% else %}
+    <li style="color: green">{{ message }}</li>
+    {% endif %} {% endfor %}
+  </ul>
+  {% endif %} {% endwith %}
 </table>
+
+<br />
+<br />
+
+<form action="{{url_for('worker_add')}}" method="post">
+  <input type="submit" class="btn btn-primary" value="Add Worker" />
+</form>
+<br />
+<form action="{{url_for('worker_register')}}" method="post">
+  <input type="submit" class="btn btn-primary" value="Register Worker" />
+</form>
 {% endblock %}

@@ -1,9 +1,6 @@
 {% extends "manager/manager_base.html" %} {% block content %}
-<form action='{{url_for("worker_list")}}' method="get">
-  <input type="submit" value="Back to List" />
-</form>
 
-<table>
+<table class="table table-border" style="width: 400px">
   <tr>
     <td>ID</td>
     <td>{{ instance.id }}</td>
@@ -11,10 +8,6 @@
   <tr>
     <td>Image AMI ID</td>
     <td>{{ instance.image_id }}</td>
-  </tr>
-  <tr>
-    <td>Key Pair</td>
-    <td>{{ instance.key_name }}</td>
   </tr>
   <tr>
     <td>Public IP Address</td>
@@ -26,12 +19,21 @@
   </tr>
 </table>
 
-<h2>CPU Utilization</h2>
-<div id="cpu_utilization_plot" style="width: 300px; height: 150px"></div>
+<br />
+<br />
 
-<h2>Network Packets In</h2>
-<div id="network_packets_in_plot" style="width: 300px; height: 150px"></div>
+<div style="display: flex; justify-content: space-around">
+  <div>
+    <h2>CPU Utilization</h2>
+    <div id="cpu_utilization_plot" style="width: 500px; height: 300px"></div>
+  </div>
+  <div>
+    <h2>Network Requests</h2>
+    <div id="network_packets_in_plot" style="width: 500px; height: 300px"></div>
+  </div>
+</div>
 
+<div style="height: 200px"></div>
 <script>
   setTimeout(() => {
     location.reload();
