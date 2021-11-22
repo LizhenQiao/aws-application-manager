@@ -94,8 +94,12 @@ def worker_add():
                                          'Groups': [config.SECRET_GROUP]
                                      }
                                  ],
-                                 UserData= "#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
+                                 UserData="#!/bin/bash\n /bin/bash /home/ubuntu/start.sh"
                                  )
+            flash('Successfully add a new worker')
+            return redirect(url_for('worker_list'))
+        else:
+            flash('The number of worker has reached the upper limit, no more workers can be added', category='error')
     return redirect(url_for('worker_list'))
 
 
@@ -119,7 +123,7 @@ def worker_register():
         for instance in instances:
             running_instances.append(instance.id)
         if not running_instances:
-            flash('Please wait until after worker initialization')
+            flash('Please wait until after worker initialization', category='error')
             return redirect(url_for('worker_list'))
         else:
             for instance_id in running_instances:
@@ -144,6 +148,10 @@ def worker_remove(id):
         instances = ec2.instances.filter(Filters=filters)
         for instance in instances:
             worker_count += 1
-        if worker_count > 0:
+        if worker_count > 1:
             ec2.instances.filter(InstanceIds=[id]).terminate()
+            flash('Successfully remove the worker')
+            return redirect(url_for('worker_list'))
+        else:
+            flash('The number of worker has reached the lower limit, no more workers can be removed', category='error')
     return redirect(url_for('worker_list'))

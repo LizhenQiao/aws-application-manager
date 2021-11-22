@@ -20,5 +20,6 @@ def auto_scaler():
     cursor.execute(query, (upperthres, lowerthres, expandratio, shrinkratio, 1))
     mysql.connection.commit()
     cursor.close()
+    flash('Successfully set the parameter of auto scaler')
 
     return render_template("manager/auto_scaling_settings.html")

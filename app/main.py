@@ -18,6 +18,7 @@ filters = [
     }
 ]
 
+
 @webapp.route('/', methods=['GET', 'POST'])
 def manager_login():
     if request.method == 'POST':
@@ -78,7 +79,6 @@ def manager_page():
 
     return render_template('manager/manager_page.html', title='Manager Page',
                            list_workers_stat=list_workers_stat, DNS_name=DNS_NAME)
-
 
 
 @webapp.route('/logout', methods=['GET', 'POST'])

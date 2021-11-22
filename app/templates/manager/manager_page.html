@@ -34,4 +34,15 @@
   };
   $.plot($("#list_workers_plot"), [ {{ list_workers_stat }} ] , options);
 </script>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flashes">
+            {% for category, message in messages %} {% if category =='error'%}
+                <li style="color: red">{{ message }}</li>
+            {% else %}
+                <li style="color: green">{{ message }}</li>
+            {% endif %} {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 {% endblock %}
